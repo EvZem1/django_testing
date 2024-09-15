@@ -30,7 +30,7 @@ class TestContentPage(TestCase):
         self.assertIn(self.note, object_list)
 
     def test_note_not_in_list_for_another_user(self):
-        """в список заметок одного пользователя не попадают заметки других юзеров."""
+        """в список одного пользователя не попадают заметки других юзеров."""
         self.client.force_login(self.author)
         response = self.client.get(self.list_url)
         object_list = response.context['object_list']

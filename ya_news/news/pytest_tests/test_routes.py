@@ -24,21 +24,23 @@ def test_news_detail_page_accessible_anonymous(client, news):
 
 @pytest.mark.django_db
 def test_redirect_for_anonymous_user(client, news, comment):
-    """Анонимные пользователи перенаправляются на страницу авторизации при попытке редактирования или удаления комментария."""
+    """Анонимы перенаправляются на страницу авторизации
+    при попытке редактирования или удаления комментария."""
     edit_url = reverse('news:edit', args=(comment.id,))
     delete_url = reverse('news:delete', args=(comment.id,))
     login_url = reverse('users:login')
-    
+
     response = client.get(edit_url)
     assertRedirects(response, f'{login_url}?next={edit_url}')
-    
+
     response = client.get(delete_url)
     assertRedirects(response, f'{login_url}?next={delete_url}')
 
 
 @pytest.mark.django_db
 def test_registration_login_logout_pages_accessible_anonymous(client):
-    """Страницы регистрации, входа и выхода из системы доступны анонимным пользователям."""
+    """Страницы регистрации, входа и выхода из системы доступны
+    анонимным пользователям."""
     urls = (
         reverse('users:signup'),
         reverse('users:login'),
@@ -100,7 +102,10 @@ def test_author_can_edit_comment(author_client, form_data, news, comment):
 
 
 @pytest.mark.django_db
-def test_user_cant_edit_comment_of_another_user(admin_client, form_data, comment):
+def test_user_cant_edit_comment_of_another_user(
+                                                admin_client,
+                                                form_data,
+                                                comment):
     """Пользователь не может редактировать чужой комментарий."""
     edit_url = reverse('news:edit', args=(comment.id,))
     response = admin_client.post(edit_url, data=form_data)
