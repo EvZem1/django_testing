@@ -24,8 +24,10 @@ def test_news_detail_page_accessible_anonymous(client, news):
 
 @pytest.mark.django_db
 def test_redirect_for_anonymous_user(client, news, comment):
-    """Анонимы перенаправляются на страницу авторизации
-    при попытке редактирования или удаления комментария."""
+    """
+    Анонимы перенаправляются на страницу авторизации
+    при попытке редактирования или удаления комментария.
+    """
     edit_url = reverse('news:edit', args=(comment.id,))
     delete_url = reverse('news:delete', args=(comment.id,))
     login_url = reverse('users:login')
@@ -39,8 +41,10 @@ def test_redirect_for_anonymous_user(client, news, comment):
 
 @pytest.mark.django_db
 def test_registration_login_logout_pages_accessible_anonymous(client):
-    """Страницы регистрации, входа и выхода из системы доступны
-    анонимным пользователям."""
+    """
+    Страницы регистрации, входа и выхода из системы доступны
+    анонимным пользователям.
+    """
     urls = (
         reverse('users:signup'),
         reverse('users:login'),
