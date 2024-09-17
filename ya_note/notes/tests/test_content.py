@@ -3,16 +3,17 @@ from django.test import TestCase
 from django.urls import reverse
 
 from notes.models import Note
-
+from notes.forms import NoteForm
 
 User = get_user_model()
 
 
-class TestContentPage(TestCase):
+class BaseTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         cls.author = User.objects.create(username='Автор')
+        cls.another_user = User.objects.create(username='Другой пользователь')
         cls.note = Note.objects.create(
             title='Заголовок',
             text='Текст',
@@ -21,29 +22,33 @@ class TestContentPage(TestCase):
         cls.add_url = reverse('notes:add')
         cls.list_url = reverse('notes:list')
         cls.edit_url = reverse('notes:edit', args=(cls.note.slug,))
+        cls.author_client = cls.client_class()
+        cls.another_user_client = cls.client_class()
+        cls.author_client.force_login(cls.author)
+        cls.another_user_client.force_login(cls.another_user)
+
+
+class TestContentPage(BaseTestCase):
 
     def test_note_in_list_for_author(self):
         """Отдельная заметка передаётся на страницу со списком заметок."""
-        self.client.force_login(self.author)
-        response = self.client.get(self.list_url)
-        object_list = response.context['object_list']
-        self.assertIn(self.note, object_list)
+        response = self.author_client.get(self.list_url)
+        notes = response.context['object_list']
+        self.assertIn(self.note, notes)
 
     def test_note_not_in_list_for_another_user(self):
-        """в список одного пользователя не попадают заметки других юзеров."""
-        self.client.force_login(self.author)
-        response = self.client.get(self.list_url)
-        object_list = response.context['object_list']
-        self.assertNotIn('note', object_list)
+        """В список одного пользователя не попадают заметки других юзеров."""
+        response = self.another_user_client.get(self.list_url)
+        notes = response.context['object_list']
+        self.assertNotIn(self.note, notes)
 
     def test_add_page_have_form(self):
-        """на страницы создания заметки передаются формы."""
-        self.client.force_login(self.author)
-        response = self.client.get(self.add_url)
+        """На странице создания заметки передаются формы."""
+        response = self.author_client.get(self.add_url)
         self.assertIn('form', response.context)
+        self.assertIsInstance(response.context['form'], NoteForm)
 
     def test_edit_page_have_form(self):
-        """на страницу редактирования заметки передаются формы."""
-        self.client.force_login(self.author)
-        response = self.client.get(self.edit_url)
+        """На странице редактирования заметки передаются формы."""
+        response = self.author_client.get(self.edit_url)
         self.assertIn('form', response.context)
