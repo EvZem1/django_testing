@@ -1,6 +1,7 @@
 import pytest
 
-from news.models import News, Comment
+from news.models import Comment, News
+from django.test import Client
 
 
 @pytest.fixture
@@ -9,7 +10,8 @@ def author(django_user_model):
 
 
 @pytest.fixture
-def author_client(author, client):
+def author_client(author):
+    client = Client()
     client.force_login(author)
     return client
 

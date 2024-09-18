@@ -1,6 +1,6 @@
 from datetime import timedelta
-import pytest
 
+import pytest
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.urls import reverse
@@ -8,10 +8,10 @@ from django.utils import timezone
 
 from news.models import News, Comment
 
+pytestmark = pytest.mark.django_db
 User = get_user_model()
 
 
-@pytest.mark.django_db
 def test_news_count(client):
     """Количество новостей на главной странице не больше 10-ти."""
     all_news = [
@@ -25,7 +25,6 @@ def test_news_count(client):
     assert news_count == settings.NEWS_COUNT_ON_HOME_PAGE
 
 
-@pytest.mark.django_db
 def test_news_order(client):
     """Сортировка новостей от нового к старому."""
     today = timezone.now()
@@ -45,7 +44,6 @@ def test_news_order(client):
     assert all_dates == sorted_dates
 
 
-@pytest.mark.django_db
 def test_comments_order(author_client):
     """Сортировка комментариев в хронологическом порядке."""
     author = User.objects.create(username='Комментатор')
@@ -66,7 +64,6 @@ def test_comments_order(author_client):
     assert all_comments[0].created < all_comments[1].created
 
 
-@pytest.mark.django_db
 def test_anonymous_client_has_no_form(client, news):
     """Анонимному пользователю недоступна форма для отправки комментария."""
     url = reverse('news:detail', args=(news.id,))
@@ -74,7 +71,6 @@ def test_anonymous_client_has_no_form(client, news):
     assert 'form' not in response.context
 
 
-@pytest.mark.django_db
 def test_authorized_client_has_form(author_client, news):
     """Авторизованному пользователю доступна форма для отправки комментария."""
     url = reverse('news:detail', args=(news.id,))

@@ -5,6 +5,7 @@ from pytest_django.asserts import assertRedirects, assertFormError
 from news.models import Comment
 from news.forms import BAD_WORDS, WARNING
 
+NEW_COMMENT_TEXT = {'text': 'Новый текст'}
 
 @pytest.mark.django_db
 def test_home_page_accessible_anonymous(client):
