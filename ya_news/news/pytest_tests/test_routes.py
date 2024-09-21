@@ -7,6 +7,7 @@ from news.forms import BAD_WORDS, WARNING
 
 NEW_COMMENT_TEXT = {'text': 'Новый текст'}
 
+
 @pytest.mark.parametrize(
     'url_name, client_type, expected_status',
     [
