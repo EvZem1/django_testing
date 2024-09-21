@@ -6,7 +6,7 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
-from news.models import News, Comment
+from news.models import News
 from news.forms import CommentForm
 
 pytestmark = pytest.mark.django_db
@@ -23,7 +23,7 @@ def test_news_count(client, news):
     assert news_count <= settings.NEWS_COUNT_ON_HOME_PAGE
 
 
-def test_news_order(client, news):
+def test_news_order(client):
     """Сортировка новостей от нового к старому."""
     today = timezone.now()
     response = client.get(reverse("news:home"))
