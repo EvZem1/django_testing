@@ -15,7 +15,7 @@ def test_news_count(client, news):
     Количество новостей на главной странице
     не больше заданного в настройках.
     """
-    response = client.get(reverse("news:home"))
+    client.get(reverse("news:home"))
     news_count = News.objects.count()
     assert news_count <= settings.NEWS_COUNT_ON_HOME_PAGE
 
