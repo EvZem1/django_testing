@@ -22,6 +22,12 @@ class NoteForm(forms.ModelForm):
         if not slug:
             title = cleaned_data.get("title")
             slug = slugify(title)[:100]
-        if Note.objects.filter(slug=slug).exclude(id=self.instance.pk).exists():
-            raise ValidationError(slug + WARNING)
+        if (
+            Note.objects.filter(slug=slug)
+            .exclude(id=self.instance.pk)
+            .exists()
+        ):
+            raise ValidationError(
+                slug + WARNING
+            )
         return slug

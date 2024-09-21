@@ -72,7 +72,10 @@ class TestNoteCreation(BaseTestCase):
         response = self.author_client.post(self.url, data=self.form_data)
         self.assertEqual(Note.objects.count(), notes_count_before)
         self.assertFormError(
-            response, form="form", field="slug", errors=self.note.slug + WARNING
+            response, 
+            form="form",
+            field="slug",
+            errors=self.note.slug + WARNING
         )
 
     def test_empty_slug(self):

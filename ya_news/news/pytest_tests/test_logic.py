@@ -54,7 +54,9 @@ def test_author_can_edit_comment(author_client, form_data, news, comment):
     assert updated_comment.news == comment.news
 
 
-def test_user_cant_edit_comment_of_another_user(admin_client, form_data, comment):
+def test_user_cant_edit_comment_of_another_user(
+        admin_client, form_data, comment
+):
     """Пользователь не может редактировать чужой комментарий."""
     edit_url = reverse("news:edit", args=(comment.id,))
     response = admin_client.post(edit_url, data=form_data)

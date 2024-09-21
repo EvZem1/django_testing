@@ -1,65 +1,84 @@
 import pytest
 from http import HTTPStatus
 from django.urls import reverse
-from pytest_django.asserts import assertRedirects, assertFormError
+from pytest_django.asserts import assertRedirects
+
 from news.models import Comment
-from news.forms import BAD_WORDS, WARNING
-
-NEW_COMMENT_TEXT = {"text": "Новый текст"}
 
 
+# 1. Главная страница доступна анонимному пользователю
+@pytest.mark.django_db
+def test_home_page_accessible_anonymous(client):
+    """Главная страница доступна анонимному пользователю."""
+    url = reverse('news:home')
+    response = client.get(url)
+    assert response.status_code == HTTPStatus.OK
 
+
+# 2. Страница отдельной новости доступна анонимному пользователю
+@pytest.mark.django_db
+def test_news_detail_page_accessible_anonymous(client, news):
+    """Страница отдельной новости доступна анонимному пользователю."""
+    url = reverse('news:detail', args=(news.id,))
+    response = client.get(url)
+    assert response.status_code == HTTPStatus.OK
+
+
+# 3. Страницы удаления и редактирования комментария доступны автору комментария
+@pytest.mark.django_db
+def test_author_can_access_edit_and_delete_pages(author_client, comment):
+    """Автор комментария может зайти на страницы редактирования и удаления."""
+    edit_url = reverse('news:edit', args=(comment.id,))
+    delete_url = reverse('news:delete', args=(comment.id,))
+
+    response_edit = author_client.get(edit_url)
+    response_delete = author_client.get(delete_url)
+
+    assert response_edit.status_code == HTTPStatus.OK
+    assert response_delete.status_code == HTTPStatus.OK
+
+
+# 4. Анонимный пользователь перенаправляется на страницу авторизации
 @pytest.mark.parametrize(
-    "url_name, client_type, expected_status",
-    [
-        ("news:home", "client", HTTPStatus.OK),
-        ("news:detail", "client", HTTPStatus.OK),
-        ("users:signup", "client", HTTPStatus.OK),
-        ("users:login", "client", HTTPStatus.OK),
-        ("users:logout", "client", HTTPStatus.OK),
-        ("news:edit", "client", HTTPStatus.FOUND),
-        ("news:delete", "client", HTTPStatus.FOUND),
-    ],
+    'url_name',
+    ['news:edit', 'news:delete']
 )
 @pytest.mark.django_db
-def test_page_statuses(
-    url_name, client_type, expected_status, client, author_client, news, comment
-):
+def test_anonymous_redirects_to_login(client, comment, url_name):
     """
-    Проверка статусов страниц для анонимного и авторизованного пользователя.
+    Анонимный пользователь перенаправляется на страницу авторизации
+    при попытке редактировать или удалить комментарий.
     """
-    clients = {"client": client, "author_client": author_client}
-    url_map = {
-        "news:home": reverse("news:home"),
-        "news:detail": reverse("news:detail", args=(news.id,)),
-        "news:edit": reverse("news:edit", args=(comment.id,)),
-        "news:delete": reverse("news:delete", args=(comment.id,)),
-        "users:signup": reverse("users:signup"),
-        "users:login": reverse("users:login"),
-        "users:logout": reverse("users:logout"),
-    }
-
-    response = clients[client_type].get(url_map[url_name])
-    assert response.status_code == expected_status
+    url = reverse(url_name, args=(comment.id,))
+    login_url = reverse('users:login')
+    response = client.get(url)
+    assertRedirects(response, f'{login_url}?next={url}')
 
 
+# 5. Авторизованный пользователь не может зайти на страницы чужих комментариев (404)
 @pytest.mark.parametrize(
-    "url_name, expected_redirect_url",
-    [
-        ("news:edit", "users:login"),
-        ("news:delete", "users:login"),
-    ],
+    'url_name',
+    ['news:edit', 'news:delete']
 )
 @pytest.mark.django_db
-def test_anonymous_redirect(url_name, expected_redirect_url, client, news, comment):
+def test_user_cant_edit_or_delete_another_users_comment(admin_client, comment, url_name):
     """
-    Анонимный пользователь перенаправляется на страницу логина при попытке
-    редактирования или удаления комментария.
+    Авторизованный пользователь не может зайти на страницы редактирования или
+    удаления чужих комментариев (404).
     """
-    url_map = {
-        "news:edit": reverse("news:edit", args=(comment.id,)),
-        "news:delete": reverse("news:delete", args=(comment.id,)),
-    }
-    login_url = reverse("users:login")
-    response = client.get(url_map[url_name])
-    assertRedirects(response, f"{login_url}?next={url_map[url_name]}")
+    url = reverse(url_name, args=(comment.id,))
+    response = admin_client.get(url)
+    assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+# 6. Страницы регистрации, входа и выхода доступны анонимным пользователям
+@pytest.mark.parametrize(
+    'url_name',
+    ['users:signup', 'users:login', 'users:logout']
+)
+@pytest.mark.django_db
+def test_auth_pages_accessible_anonymous(client, url_name):
+    """Страницы регистрации, входа и выхода доступны анонимным пользователям."""
+    url = reverse(url_name)
+    response = client.get(url)
+    assert response.status_code == HTTPStatus.OK
