@@ -5,12 +5,12 @@ from notes.models import Note
 
 @pytest.fixture
 def author(django_user_model):
-    return django_user_model.objects.create(username='Автор')
+    return django_user_model.objects.create(username="Автор")
 
 
 @pytest.fixture
 def not_author(django_user_model):
-    return django_user_model.objects.create(username='Не автор')
+    return django_user_model.objects.create(username="Не автор")
 
 
 @pytest.fixture
@@ -30,9 +30,9 @@ def not_author_client(not_author):
 @pytest.fixture
 def note(author):
     note = Note.objects.create(
-        title='Заголовок',
-        text='Текст заметки',
-        slug='note-slug',
+        title="Заголовок",
+        text="Текст заметки",
+        slug="note-slug",
         author=author,
     )
     return note

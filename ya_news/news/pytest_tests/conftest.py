@@ -6,7 +6,7 @@ from django.test import Client
 
 @pytest.fixture
 def author(django_user_model):
-    return django_user_model.objects.create(username='Автор')
+    return django_user_model.objects.create(username="Автор")
 
 
 @pytest.fixture
@@ -19,19 +19,16 @@ def author_client(author):
 @pytest.fixture
 def news():
     return News.objects.create(
-        title='Заголовок',
-        text='Текст',
+        title="Заголовок",
+        text="Текст",
     )
 
 
 @pytest.fixture
 def comment(author, news):
-    return Comment.objects.create(
-        news=news,
-        text='Комментарий',
-        author=author
-    )
+    return Comment.objects.create(news=news, text="Комментарий", author=author)
+
 
 @pytest.fixture
 def form_data():
-    return {'text': 'Новый текст'}
+    return {"text": "Новый текст"}
