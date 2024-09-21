@@ -32,7 +32,6 @@ def comment(author, news):
         author=author
     )
 
-
 @pytest.fixture
 def form_data():
     return {'text': 'Новый текст'}
