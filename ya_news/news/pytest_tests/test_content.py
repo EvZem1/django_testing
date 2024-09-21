@@ -1,10 +1,7 @@
-from datetime import timedelta
-
 import pytest
 from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.urls import reverse
-from django.utils import timezone
 
 from news.models import News
 from news.forms import CommentForm
@@ -25,7 +22,6 @@ def test_news_count(client, news):
 
 def test_news_order(client):
     """Сортировка новостей от нового к старому."""
-    today = timezone.now()
     response = client.get(reverse("news:home"))
     news_list = response.context["object_list"]
     all_dates = [n.date for n in news_list]

@@ -84,7 +84,10 @@ class CommentBase(LoginRequiredMixin):
 
     def get_success_url(self):
         comment = self.get_object()
-        return reverse("news:detail", kwargs={"pk": comment.news.pk}) + "#comments"
+        return (
+            reverse("news:detail", kwargs={"pk": comment.news.pk})
+            + "#comments"
+        )
 
     def get_queryset(self):
         """Пользователь может работать только со своими комментариями."""
