@@ -1,6 +1,5 @@
 
 import pytest
-from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.test import Client
 
@@ -15,6 +14,7 @@ User = get_user_model()
 @pytest.fixture
 def author(django_user_model):
     return django_user_model.objects.create(username="Автор")
+
 
 @pytest.fixture
 def not_author(django_user_model):
