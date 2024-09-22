@@ -1,7 +1,7 @@
 import pytest
+from django.test import Client
 
 from news.models import Comment, News
-from django.test import Client
 
 
 @pytest.fixture
@@ -27,8 +27,3 @@ def news():
 @pytest.fixture
 def comment(author, news):
     return Comment.objects.create(news=news, text="Комментарий", author=author)
-
-
-@pytest.fixture
-def form_data():
-    return {"text": "Новый текст"}
