@@ -58,10 +58,12 @@ def test_user_cant_edit_or_delete_another_users_comment(
 
 
 @pytest.mark.parametrize(
-        "url_name",
-        ["users:signup",
-         "users:login",
-         "users:logout"]
+    "url_name",
+    [
+        "users:signup",
+        "users:login",
+        "users:logout"
+    ]
 )
 def test_auth_pages_accessible_anonymous(client, url_name):
     """
