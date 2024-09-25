@@ -34,3 +34,10 @@ def test_anonymous_redirects_to_login(client, comment, url_name):
     login_url = reverse('users:login')
     response = client.get(url)
     assertRedirects(response, f'{login_url}?next={url}')
+
+@pytest.mark.django_db
+def test_news_detail_page_accessible_anonymous(client, news):
+    """Страница отдельной новости доступна анонимному пользователю."""
+    url = reverse('news:detail', args=(news.id,))
+    response = client.get(url)
+    assert response.status_code == HTTPStatus.OK

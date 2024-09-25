@@ -1,54 +1,10 @@
-
-import pytest
 from django.contrib.auth import get_user_model
-from django.test import Client
+from django.urls import reverse
 
 from notes.forms import NoteForm
-from notes.models import Note
-
-from .base_test_case import BaseTestCase  # Corrected relative import order
+from .base_test_case import BaseTestCase
 
 User = get_user_model()
-
-
-@pytest.fixture
-def author(django_user_model):
-    return django_user_model.objects.create(username="Автор")
-
-
-@pytest.fixture
-def not_author(django_user_model):
-    return django_user_model.objects.create(username="Не автор")
-
-
-@pytest.fixture
-def author_client(author):
-    client = Client()
-    client.force_login(author)
-    return client
-
-
-@pytest.fixture
-def not_author_client(not_author):
-    client = Client()
-    client.force_login(not_author)
-    return client
-
-
-@pytest.fixture
-def note(author):
-    note = Note.objects.create(
-        title="Заголовок",
-        text="Текст заметки",
-        slug="note-slug",
-        author=author,
-    )
-    return note
-
-
-@pytest.fixture
-def slug_for_args(note):
-    return (note.slug,)
 
 
 class TestContentPage(BaseTestCase):
@@ -66,13 +22,19 @@ class TestContentPage(BaseTestCase):
         self.assertNotIn(self.note, notes)
 
     def test_add_page_have_form(self):
-        """На странице создания заметки передаются формы."""
+        """
+        На странице создания заметки передаются формы.
+        Проверка, что форма является экземпляром NoteForm.
+        """
         response = self.author_client.get(self.add_url)
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], NoteForm)
 
     def test_edit_page_have_form(self):
-        """На странице редактирования заметки передаются формы."""
+        """
+        На странице редактирования заметки передаются формы.
+        Проверка, что форма является экземпляром NoteForm.
+        """
         response = self.author_client.get(self.edit_url)
         self.assertIn("form", response.context)
         self.assertIsInstance(response.context["form"], NoteForm)
