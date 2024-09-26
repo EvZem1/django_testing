@@ -16,12 +16,9 @@ def test_user_can_create_comment(author_client, author, news):
     comments_count_before = Comment.objects.count()
     url = reverse("news:detail", args=(news.id,))
     comment_text = "Новый текст"
-    
     response = author_client.post(url, data={"text": comment_text})
-    
     assertRedirects(response, f"{url}#comments")
     assert Comment.objects.count() == comments_count_before + 1
-    
     comment = Comment.objects.get(author=author, news=news)
     assert comment.text == comment_text
     assert comment.author == author

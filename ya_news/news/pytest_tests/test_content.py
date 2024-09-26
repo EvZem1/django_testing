@@ -3,7 +3,6 @@ from django.urls import reverse
 from django.conf import settings
 
 from news.forms import CommentForm
-from news.models import News
 
 pytestmark = pytest.mark.django_db
 
@@ -29,7 +28,7 @@ def test_comments_order(author_client, news, comment_batch):
     all_comments = list(
         response.context["news"].comment_set.all().order_by("created")
     )
-    assert all_comments  # Ensuring list is not empty
+    assert all_comments
     assert all(
         all_comments[i].created <= all_comments[i + 1].created
         for i in range(len(all_comments) - 1)

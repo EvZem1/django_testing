@@ -53,7 +53,7 @@ class TestNoteCreation(BaseTestCase):
     def test_empty_slug(self):
         """
         Проверка создания заметки с пустым slug,
-        чтобы автоматически сгенерирован.
+        чтобы он был автоматически сгенерирован.
         """
         Note.objects.all().delete()
         notes_count_before = Note.objects.count()
@@ -61,8 +61,10 @@ class TestNoteCreation(BaseTestCase):
         response = self.author_client.post(self.add_url, data=self.form_data)
         self.assertRedirects(response, self.url_to_notes)
         notes_count = Note.objects.count()
-        self.assertGreater(notes_count, notes_count_before)
+        self.assertEqual(notes_count, notes_count_before + 1)
         new_note = Note.objects.get()
+        expected_slug = slugify(self.form_data["title"])
+        self.assertEqual(new_note.slug, expected_slug)
         self.assertEqual(new_note.title, self.form_data["title"])
         self.assertEqual(new_note.text, self.form_data["text"])
 
