@@ -54,9 +54,7 @@ def test_anonymous_redirects_to_login(
 def test_auth_pages_accessible_anonymous(
     request, client, url_fixture
 ):
-    """
-    Страницы регистрации, входа и выхода доступны анонимным пользователям.
-    """
+    """Страницы доступны анонимным пользователям."""
     url = request.getfixturevalue(url_fixture)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK
