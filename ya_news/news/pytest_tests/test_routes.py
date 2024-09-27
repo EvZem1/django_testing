@@ -1,75 +1,62 @@
 from http import HTTPStatus
-
 import pytest
-from django.urls import reverse
 from pytest_django.asserts import assertRedirects
 
 pytestmark = pytest.mark.django_db
 
 
-@pytest.mark.parametrize("url_name", ["news:home"])
-def test_home_page_accessible_anonymous(client, url_name):
-    """Главная страница доступна анонимному пользователю."""
-    url = reverse(url_name)
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.parametrize("url_name", ["news:edit", "news:delete"])
-def test_author_can_access_edit_and_delete_pages(
-    author_client,
-    comment,
-    url_name
+@pytest.mark.parametrize(
+    "url_fixture, client_fixture, expected_status",
+    [
+        ("home_url", "client", HTTPStatus.OK),
+        ("detail_url", "client", HTTPStatus.OK),
+        ("edit_url", "author_client", HTTPStatus.OK),
+        ("delete_url", "author_client", HTTPStatus.OK),
+        ("edit_url", "admin_client", HTTPStatus.NOT_FOUND),
+        ("delete_url", "admin_client", HTTPStatus.NOT_FOUND),
+    ]
+)
+def test_accessible_pages(
+    request, url_fixture, client_fixture, expected_status
 ):
-    """Автор комментария может зайти на страницы редактирования и удаления."""
-    url = reverse(url_name, args=(comment.id,))
-    response = author_client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.parametrize("url_name", ["news:edit", "news:delete"])
-def test_anonymous_redirects_to_login(client, comment, url_name):
-    """Анонимный пользователь перенаправляется на страницу авторизации."""
-    url = reverse(url_name, args=(comment.id,))
-    login_url = reverse('users:login')
+    """Тестирование доступности страниц для различных клиентов."""
+    url = request.getfixturevalue(url_fixture)
+    client = request.getfixturevalue(client_fixture)
     response = client.get(url)
-    assertRedirects(response, f'{login_url}?next={url}')
-
-
-@pytest.mark.django_db
-def test_news_detail_page_accessible_anonymous(client, news):
-    """Страница отдельной новости доступна анонимному пользователю."""
-    url = reverse('news:detail', args=(news.id,))
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.parametrize("url_name", ["news:edit", "news:delete"])
-def test_user_cant_edit_or_delete_another_users_comment(
-    admin_client, comment, url_name
-):
-    """
-    Авторизованный пользователь не может зайти
-    на страницы редактирования или удаления чужих комментариев (404).
-    """
-    url = reverse(url_name, args=(comment.id,))
-    response = admin_client.get(url)
-    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.status_code == expected_status
 
 
 @pytest.mark.parametrize(
-    "url_name",
+    "url_fixture, client_fixture",
     [
-        "users:signup",
-        "users:login",
-        "users:logout"
+        ("edit_url", "client"),
+        ("delete_url", "client"),
     ]
 )
-def test_auth_pages_accessible_anonymous(client, url_name):
+def test_anonymous_redirects_to_login(
+    request, url_fixture, client_fixture, login_url
+):
+    """Анонимный пользователь перенаправляется на страницу авторизации."""
+    url = request.getfixturevalue(url_fixture)
+    client = request.getfixturevalue(client_fixture)
+    response = client.get(url)
+    assertRedirects(response, f"{login_url}?next={url}")
+
+
+@pytest.mark.parametrize(
+    "url_fixture",
+    [
+        "signup_url",
+        "login_url",
+        "logout_url"
+    ]
+)
+def test_auth_pages_accessible_anonymous(
+    request, client, url_fixture
+):
     """
-    Страницы регистрации, входа и выхода
-    доступны анонимным пользователям.
+    Страницы регистрации, входа и выхода доступны анонимным пользователям.
     """
-    url = reverse(url_name)
+    url = request.getfixturevalue(url_fixture)
     response = client.get(url)
     assert response.status_code == HTTPStatus.OK

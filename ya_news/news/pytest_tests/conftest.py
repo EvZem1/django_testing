@@ -1,8 +1,9 @@
 import pytest
-from django.test import Client
-from news.models import Comment, News
 from django.conf import settings
+from django.test import Client
 from django.urls import reverse
+
+from news.models import Comment, News
 
 
 @pytest.fixture
@@ -39,11 +40,22 @@ def news():
 
 @pytest.fixture
 def news_batch():
-    """Создает batch новостей для тестов"""
-    return News.objects.bulk_create([
-        News(title=f"Заголовок {i}", text=f"Текст {i}")
-        for i in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
-    ])
+    """Создает batch новостей для тестов с заданной датой создания"""
+    from datetime import timedelta
+    from django.utils import timezone
+
+    current_time = timezone.now()
+
+    return News.objects.bulk_create(
+        [
+            News(
+                title=f"Заголовок {i}",
+                text=f"Текст {i}",
+                date=current_time - timedelta(days=i)
+            )
+            for i in range(settings.NEWS_COUNT_ON_HOME_PAGE + 1)
+        ]
+    )
 
 
 @pytest.fixture
@@ -53,11 +65,20 @@ def comment(author, news):
 
 @pytest.fixture
 def comment_batch(news, author):
-    """Создает batch комментариев для тестов"""
-    return Comment.objects.bulk_create([
-        Comment(news=news, text=f"Комментарий {i}", author=author)
-        for i in range(2)
-    ])
+    """Создает комментарии с уникальными датами создания"""
+    from django.utils import timezone
+
+    comments = []
+    for i in range(2):
+        comment = Comment.objects.create(
+            news=news,
+            text=f"Комментарий {i}",
+            author=author,
+        )
+        comment.created = timezone.now() - timezone.timedelta(minutes=i)
+        comment.save()
+        comments.append(comment)
+    return comments
 
 
 @pytest.fixture
@@ -92,3 +113,13 @@ def auth_urls():
         reverse('users:login'),
         reverse('users:logout')
     ]
+
+
+@pytest.fixture
+def signup_url():
+    return reverse('users:signup')
+
+
+@pytest.fixture
+def logout_url():
+    return reverse('users:logout')
