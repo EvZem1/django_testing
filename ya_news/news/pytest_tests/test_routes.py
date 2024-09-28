@@ -14,6 +14,9 @@ pytestmark = pytest.mark.django_db
         ("delete_url", "author_client", HTTPStatus.OK),
         ("edit_url", "admin_client", HTTPStatus.NOT_FOUND),
         ("delete_url", "admin_client", HTTPStatus.NOT_FOUND),
+        ("signup_url", "client", HTTPStatus.OK),
+        ("login_url", "client", HTTPStatus.OK),
+        ("logout_url", "client", HTTPStatus.OK),
     ]
 )
 def test_accessible_pages(
@@ -41,20 +44,3 @@ def test_anonymous_redirects_to_login(
     client = request.getfixturevalue(client_fixture)
     response = client.get(url)
     assertRedirects(response, f"{login_url}?next={url}")
-
-
-@pytest.mark.parametrize(
-    "url_fixture",
-    [
-        "signup_url",
-        "login_url",
-        "logout_url"
-    ]
-)
-def test_auth_pages_accessible_anonymous(
-    request, client, url_fixture
-):
-    """Страницы доступны анонимным пользователям."""
-    url = request.getfixturevalue(url_fixture)
-    response = client.get(url)
-    assert response.status_code == HTTPStatus.OK

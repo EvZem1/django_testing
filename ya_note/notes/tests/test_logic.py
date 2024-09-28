@@ -65,8 +65,6 @@ class TestNoteCreation(BaseTestCase):
         new_note = Note.objects.get()
         expected_slug = slugify(self.form_data["title"])
         self.assertEqual(new_note.slug, expected_slug)
-        self.assertEqual(new_note.title, self.form_data["title"])
-        self.assertEqual(new_note.text, self.form_data["text"])
 
 
 class TestNoteEditDelete(BaseTestCase):

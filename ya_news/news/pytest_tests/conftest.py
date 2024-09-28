@@ -2,6 +2,8 @@ import pytest
 from django.conf import settings
 from django.test import Client
 from django.urls import reverse
+from datetime import timedelta
+from django.utils import timezone
 
 from news.models import Comment, News
 
@@ -41,9 +43,6 @@ def news():
 @pytest.fixture
 def news_batch():
     """Создает batch новостей для тестов с заданной датой создания"""
-    from datetime import timedelta
-    from django.utils import timezone
-
     current_time = timezone.now()
 
     return News.objects.bulk_create(
@@ -66,9 +65,6 @@ def comment(author, news):
 @pytest.fixture
 def comment_batch(news, author):
     """Создает комментарии с уникальными датами создания"""
-    from django.utils import timezone
-
-    comments = []
     for i in range(2):
         comment = Comment.objects.create(
             news=news,
@@ -77,8 +73,6 @@ def comment_batch(news, author):
         )
         comment.created = timezone.now() - timezone.timedelta(minutes=i)
         comment.save()
-        comments.append(comment)
-    return comments
 
 
 @pytest.fixture
